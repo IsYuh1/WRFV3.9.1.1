@@ -768,6 +768,12 @@ MODULE module_sf_urban
    if(alhoption==1) ALH = ALH*alhdiuprf(tloc2)*alhseason(Kalh)
 
    IF( ZDC+Z0C+2. >= ZA) THEN
+    write(mesg,*) 'ZDC=', ZDC
+    call wrf_message(mesg)
+    write(mesg,*) 'Z0C=', Z0C
+    call wrf_message(mesg)
+    write(mesg,*) 'ZA=', ZA
+    call wrf_message(mesg)
     CALL wrf_error_fatal ("ZDC + Z0C + 2m is larger than the 1st WRF level "// &
                            "Stop in subroutine urban - change ZDC and Z0C" ) 
    END IF
@@ -1282,7 +1288,7 @@ ENDIF
        RB2=EPSB*( (1.-EPSG)*VFWG*VFGS*RX                          &
        +(1.-EPSG)*EPSB*VFGW*VFWG*SIG*(TBP**4.)/60.                &
        +(1.-EPSB)*VFWS*(1.-2.*VFWS)*RX                            &
-       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*EPSG*TGP**4./60.     &
+       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*SIG*EPSG*TGP**4./60.     &
        +EPSB*(1.-EPSB)*(1.-2.*VFWS)*(1.-2.*VFWS)*SIG*TBP**4./60. )
 
        RG=RG1+RG2
@@ -1401,7 +1407,7 @@ ENDIF
        RB2=EPSB*( (1.-EPSG)*VFWG*VFGS*RX                          &
        +(1.-EPSG)*EPSB*VFGW*VFWG*SIG*(TBP**4.)/60.                &
        +(1.-EPSB)*VFWS*(1.-2.*VFWS)*RX                            &
-       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*EPSG*SIG*EPSG*TGP**4./60.     &
+       +(1.-EPSB)*VFWG*(1.-2.*VFWS)*SIG*EPSG*TGP**4./60.     &
        +EPSB*(1.-EPSB)*(1.-2.*VFWS)*(1.-2.*VFWS)*SIG*TBP**4./60. )
 
        RG=RG1+RG2
@@ -2864,7 +2870,7 @@ ENDIF
 
 
       IF (CHECK.EQ.0)THEN
-      IF(IVGTYP(I,J).EQ.1)THEN
+      IF(IVGTYP(I,J).EQ.ISURBAN)THEN
         write(mesg,*) 'TSURFACE0_URB',TSURFACE0_URB(I,J)
         call wrf_message(mesg)
         write(mesg,*) 'TDEEP0_URB', TDEEP0_URB(I,J)
@@ -3028,13 +3034,13 @@ SUBROUTINE SFCDIF_URB (ZLM,Z0,THZ0,THLM,SFCSPD,AKANDA,AKMS,AKHS,RLMO,CD)
 ! LECH'S SURFACE FUNCTIONS
 ! ----------------------------------------------------------------------
       PSLMU (ZZ)= -0.96* log (1.0-4.5* ZZ)
-      PSLMS (ZZ)= ZZ * RRIC -2.076* (1. -1./ (ZZ +1.))
+      PSLMS (ZZ)= (ZZ/RFC) -2.076* (1. -1./ (ZZ +1.))
       PSLHU (ZZ)= -0.96* log (1.0-4.5* ZZ)
 
 ! ----------------------------------------------------------------------
 ! PAULSON'S SURFACE FUNCTIONS
 ! ----------------------------------------------------------------------
-      PSLHS (ZZ)= ZZ * RFAC -2.076* (1. -1./ (ZZ +1.))
+      PSLHS (ZZ)= ZZ * RFAC -2.076* (1. - EXP (-1.2 * ZZ))
       PSPMU (XX)= -2.* log ( (XX +1.)*0.5) - log ( (XX * XX +1.)*0.5)   &
      &        +2.* ATAN (XX)                                            &
      &- PIHF
